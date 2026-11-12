@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cookie Cookie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<main id="view">
+  <section class="page" id="p-inicio">
+    <div class="hero" id="hero">
+      <div class="stage" id="stage">
+        <div class="words" id="words">
+          <div class="word w1 grad">Cookie.</div>
+          <div class="word w2 grad">Cookie.</div>
+        </div>
+        <canvas class="gl" id="gl" role="img" aria-label="Cookie Cookie embalado em plástico transparente, girando em 3D"></canvas><img class="fb" id="fb" alt="" hidden>
+        <div class="intro" id="intro">
+          <h2 class="grad">Alegria em forma de cookie</h2>
+          <p>Cookies recheados, assados com carinho e com um preço justo. Escolha o seu favorito.</p>
+          <a class="cta" href="#cardapio" id="go">Ver cardápio <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="pola" id="pola">
+      <div class="pc" style="--x:2%;--y:3%;--r:-9deg"><img src="" alt="Cookie e café sobre um guardanapo xadrez"></div>
+      <div class="pc" style="--x:36%;--y:11%;--r:7deg"><img src="" alt="Cookie sobre uma tábua de bambu"></div>
+      <div class="pc" style="--x:14%;--y:37%;--r:-3deg"><img src="" alt="Cookie visto de lado"></div>
+    </div>
+    <p class="phint">Arraste as fotos</p>
+    <div class="menu" id="cardapio">
+      <h2 class="grad">Cardápio</h2>
+      <p class="soft">Toque em + para adicionar ao carrinho.</p>
+      <div id="folders"></div>
+    </div>
+  </section>
+
+  <section class="page" id="p-sobre" hidden>
+    <h1 class="grad">Sobre a Cookie Cookie</h1>
+    <p class="lead">Nossa missão é trazer alegria através dos cookies, com um preço justo.</p>
+    <p class="soft">Acreditamos que um bom cookie não precisa ser caro para ser especial. Por isso cada sabor é pensado para dar vontade de repetir, e cabe no bolso de quem quer se presentear ou presentear alguém.</p>
+    <div class="vals">
+      <div class="panel"><h3>Alegria</h3><p>Um cookie é um motivo pequeno para sorrir. Queremos ser esse motivo.</p></div>
+      <div class="panel"><h3>Preço justo</h3><p>Sabor de verdade sem pesar no orçamento.</p></div>
+      <div class="panel"><h3>Feito com carinho</h3><p>Assado para ser dividido com quem a gente gosta.</p></div>
+    </div>
+  </section>
+
+  <section class="page" id="p-contato" hidden>
+    <h1 class="grad">Contato</h1>
+    <p class="lead">Fale com a gente para tirar dúvidas ou fazer encomendas.</p>
+    <div class="panel contact">
+      <a href="https://wa.me/5547999037955" target="_blank" rel="noopener"><span class="k">W</span><div><b>WhatsApp</b><small>(47) 99903-7955</small></div></a>
+      <div class="off"><span class="k">@</span><span><b>E-mail</b><small>em breve</small></span></div>
+      <div class="off"><span class="k">#</span><span><b>Redes sociais</b><small>em breve</small></span></div>
+    </div>
+  </section>
+
+  <section class="page" id="p-carrinho" hidden>
+    <h1 class="grad">Carrinho</h1>
+    <div id="cart"></div>
+  </section>
+
+  <section class="page" id="p-avaliacoes" hidden>
+    <h1 class="grad">Avaliações</h1>
+    <div class="seg" id="avtabs" role="group"><button data-t="rev" aria-pressed="true">Avaliações</button><button data-t="ide" aria-pressed="false">Sugestões</button></div>
+    <div class="moments">
+      <h2 class="grad">Bons momentos que proporcionamos</h2>
+      <div class="deck" id="deck"><div class="cc" data-pos="0"><img src="" alt="Cookie de limão embalado com café"></div><div class="cc" data-pos="1"><img src="" alt="Cookie de chocolate na mão"></div><div class="cc" data-pos="2"><img src="" alt="Cookie embalado ao lado de um café com leite"></div></div>
+    </div>
+    <div id="av-rev"></div>
+    <div id="av-ide" hidden></div>
+  </section>
+</main>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><path id="star" d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></defs></svg>
+
+<nav class="nav" id="nav" aria-label="Navegação principal">
+  <span class="bub" aria-hidden="true"></span>
+  <button data-r="sobre" aria-label="Sobre a Cookie Cookie"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 4 4 0 0 1-4-4 4 4 0 0 1-5-5z"/><circle class="f" cx="9" cy="10" r="1"/><circle class="f" cx="12" cy="15.5" r="1"/><circle class="f" cx="15.5" cy="13" r="1"/><circle class="f" cx="8.5" cy="14.5" r=".8"/></svg></button>
+  <button data-r="contato" aria-label="Contato"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></button>
+  <button data-r="inicio" aria-label="Início e cardápio" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></button>
+  <button data-r="carrinho" aria-label="Carrinho"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 8H6"/></svg><span class="badge" id="badge" hidden>0</span></button>
+  <button data-r="avaliacoes" aria-label="Avaliações"><svg viewBox="0 0 24 24"><use href="#star"/></svg></button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="assets.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
