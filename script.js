@@ -1,13 +1,18 @@
 (function(){
   var TEX=CC_IMG.hero,TEXB=CC_IMG.body,PL1=CC_IMG.pl1,PL2=CC_IMG.pl2,STK=CC_IMG.stk;
   var ITEMS=[
-    {id:"trad",n:"Cookie tradicional",d:"Massa de baunilha com pedaços de chocolate meio amargo. O tradicional que todos nós amamos!",p:4,i:CC_IMG.trad},
-    {id:"nozes",n:"Cookie de nozes",d:"Massa de cacau 70% com pedaços de chocolate meio amargo e nozes.",p:5,i:CC_IMG.nozes},
-    {id:"limao",n:"Cookie de limão siciliano",d:"Massa de baunilha com raspas de limão siciliano e pedaços de chocolate branco.",p:6,i:CC_IMG.limao},
-    {id:"kitkat",n:"Cookie de Kit Kat",d:"Massa de baunilha com pedaços de Kit Kat, chocolate meio amargo e recheio cremoso de Kit Kat.",p:6,i:CC_IMG.kitkat},
-    {id:"ovo",n:"Cookie de Ovomaltine",d:"Massa de baunilha recheada com creme de Ovomaltine, camada de chocolate meio amargo e cereal de Ovomaltine.",p:7,i:CC_IMG.ovo},
-    {id:"oreo",n:"Cookie de Oreo",d:"Massa de baunilha com pedaços de Oreo, chocolate meio amargo e branco, com um mini Oreo no topo.",p:7,i:CC_IMG.oreo}
+    {id:"trad",cat:"cookies",n:"Cookie tradicional",d:"Massa de baunilha com pedaços de chocolate meio amargo. O tradicional que todos nós amamos!",p:4,i:CC_IMG.trad},
+    {id:"nozes",cat:"cookies",n:"Cookie de nozes",d:"Massa de cacau 70% com pedaços de chocolate meio amargo e nozes.",p:5,i:CC_IMG.nozes},
+    {id:"limao",cat:"cookies",n:"Cookie de limão siciliano",d:"Massa de baunilha com raspas de limão siciliano e pedaços de chocolate branco.",p:6,i:CC_IMG.limao},
+    {id:"kitkat",cat:"cookies",n:"Cookie de Kit Kat",d:"Massa de baunilha com pedaços de Kit Kat, chocolate meio amargo e recheio cremoso de Kit Kat.",p:6,i:CC_IMG.kitkat},
+    {id:"ovo",cat:"cookies",n:"Cookie de Ovomaltine",d:"Massa de baunilha recheada com creme de Ovomaltine, camada de chocolate meio amargo e cereal de Ovomaltine.",p:7,i:CC_IMG.ovo},
+    {id:"oreo",cat:"cookies",n:"Cookie de Oreo",d:"Massa de baunilha com pedaços de Oreo, chocolate meio amargo e branco, com um mini Oreo no topo.",p:7,i:CC_IMG.oreo},
+    // preço null = "R$ x" (a definir): o botão fica desativado até você colocar o valor em p
+    {id:"laranja",cat:"bolos",n:"Bolo laranja amanteigado",d:"Bolo amanteigado de laranja, finalizado com fatias de laranja caramelizadas.",p:null,i:CC_IMG.laranja},
+    {id:"indiano",cat:"bolos",n:"Bolo indiano",d:"Bolo macio finalizado com açúcar de confeiteiro em desenho.",p:null,i:CC_IMG.indiano},
+    {id:"tortc",cat:"tortinhas",n:"Tortinha de chocolate com caramelo",d:"Massa de chocolate, recheio de caramelo e cobertura de chocolate.",p:null,i:CC_IMG.tort}
   ];
+  var CATS=[["cookies","Cookies"],["bolos","Bolos"],["tortinhas","Tortinhas"]];
   var ROUTES=["sobre","contato","inicio","carrinho","avaliacoes"],PHONE="5547999037955";
   var $=function(s){return document.querySelector(s)};
   var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
@@ -18,24 +23,56 @@
   function count(){return Object.keys(cart).reduce(function(a,k){return a+cart[k]},0)}
 
   // cardápio
-  $("#grid").innerHTML=ITEMS.map(function(x){
-    return '<article class="panel item"><img src="'+x.i+'" alt="'+x.n+'"><div><h3>'+x.n+'</h3><p>'+x.d+'</p><div class="row"><span class="price">'+money(x.p)+'</span><button class="add" data-add="'+x.id+'" aria-label="Adicionar '+x.n+' ao carrinho">+</button></div></div></article>';
-  }).join("");
+  function card(x){var no=x.p==null;return '<article class="panel item"><img src="'+x.i+'" alt="'+esc(x.n)+'"><div><h3>'+x.n+'</h3><p>'+x.d+'</p><div class="row"><span class="price">'+(no?"R$ x":money(x.p))+'</span>'+(no?'<button class="add" disabled aria-label="Preço em breve" title="Preço em breve">+</button>':'<button class="add" data-add="'+x.id+'" aria-label="Adicionar '+esc(x.n)+' ao carrinho">+</button>')+'</div></div></article>'}
+  $("#folders").innerHTML=CATS.map(function(c){return '<section class="folder"><button class="fh" data-f="'+c[0]+'" aria-expanded="false" aria-controls="f-'+c[0]+'"><span>'+c[1]+'</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="fbody" id="f-'+c[0]+'" hidden><div class="grid">'+ITEMS.filter(function(x){return x.cat===c[0]}).map(card).join("")+'</div></div></section>'}).join("");
+  document.addEventListener("click",function(e){var f=e.target.closest("[data-f]");if(!f)return;var o=f.getAttribute("aria-expanded")!=="true";f.setAttribute("aria-expanded",o);$("#f-"+f.dataset.f).hidden=!o});
+
+  // fotos soltas (polaroids arrastáveis)
+  var PH=[CC_IMG.g1,CC_IMG.g2,CC_IMG.g3],Z=10;
+  document.querySelectorAll(".pc").forEach(function(c,n){
+    c.querySelector("img").src=PH[n];var x=0,y=0,sx=0,sy=0,dr=false,pa=$("#pola");
+    c.addEventListener("pointerdown",function(e){dr=true;try{c.setPointerCapture(e.pointerId)}catch(_){}sx=e.clientX-x;sy=e.clientY-y;c.style.zIndex=++Z;c.classList.add("lift")});
+    c.addEventListener("pointermove",function(e){if(!dr)return;
+      x=Math.max(-c.offsetLeft-30,Math.min(pa.clientWidth-c.offsetWidth-c.offsetLeft+30,e.clientX-sx));
+      y=Math.max(-c.offsetTop-30,Math.min(pa.clientHeight-c.offsetHeight-c.offsetTop+30,e.clientY-sy));c.style.translate=x+"px "+y+"px"});
+    var up=function(){dr=false;c.classList.remove("lift")};
+    c.addEventListener("pointerup",up);c.addEventListener("pointercancel",up);
+  });
+
+  // carrossel "bons momentos" (cartas que sobem de trás)
+  (function(){
+    var cs=[].slice.call(document.querySelectorAll("#deck .cc")),CI=[CC_IMG.c1,CC_IMG.c2,CC_IMG.c3],ord=[0,1,2],busy=false;
+    cs.forEach(function(c,i){c.querySelector("img").src=CI[i]});
+    function step(){
+      if(busy)return;busy=true;var f=cs[ord[0]];f.classList.add("gone");
+      ord.push(ord.shift());cs[ord[0]].dataset.pos=0;cs[ord[1]].dataset.pos=1;
+      setTimeout(function(){f.style.transition="none";f.classList.remove("gone");f.dataset.pos=2;void f.offsetWidth;f.style.transition="";busy=false},850);
+    }
+    cs.forEach(function(c){c.addEventListener("click",step)});
+    setInterval(function(){if(cur==="avaliacoes"&&!document.hidden)step()},3400);
+  })();
+
   var tt;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("on")},1400)}
 
-  // ---- frete ----
-  var LOJA="Rua Santa Efigênia, Blumenau – SC",FRETE={km:1.5,free:20};
+  // ---- recebimento ----
+  var LOJA="Rua Santa Efigênia, Blumenau – SC",FRETE={km:1.5,min:20};
   // km ESTIMADOS a partir da loja: ajuste cada valor para a distância real
   var REG=[["Centro",2],["Jardim Blumenau",2],["Ponta Aguda",3],["Vila Nova",3],["Bom Retiro",3],["Vorstadt",3],["Victor Konder",3.5],["Boa Vista",4],["Garcia",4],["Valparaíso",4],["Glória",4],["Itoupava Seca",4],["Água Verde",5],["Progresso",5],["Velha",5],["Itoupava Norte",6],["Fidélis",6],["Escola Agrícola",7],["Fortaleza",8],["Badenfurt",9],["Gaspar",14],["Indaial",18],["Pomerode",22]];
-  var ship={mode:"retirar",reg:"",rua:"",ref:""};
-  var kmf=function(k){return String(k).replace(".",",")};
-  function lines(){return Object.keys(cart).filter(function(k){return cart[k]>0}).map(function(k){return{x:ITEMS.filter(function(i){return i.id===k})[0],q:cart[k]}})}
-  function shipInfo(c){
-    if(ship.mode!=="entrega")return{fee:0,ok:true};
-    var r=REG.filter(function(x){return x[0]===ship.reg})[0],free=c>=FRETE.free;
-    if(!r)return{ok:false,fee:0,free:free};
-    return{sel:true,km:r[1],free:free,fee:free?0:Math.round(r[1]*FRETE.km*100)/100,ok:ship.rua.trim().length>2};
+  var MODES=[["retirar","Retirar"],["combinar","A combinar"],["entrega","Entrega"]];
+  var ship={mode:"retirar",reg:"",rua:"",ref:"",comb:""};
+  var kmf=function(k){return String(k).replace(".",",")},kmp=String(FRETE.km).replace(".",",")+"0";
+
+  function lines(){return Object.keys(cart).filter(function(k){return cart[k]>0}).map(function(k){return{x:ITEMS.filter(function(i){return i.id===k})[0],q:cart[k]}}).filter(function(l){return l.x})}
+  function ck(){return lines().reduce(function(a,l){return a+(l.x.cat==="cookies"?l.q:0)},0)}
+
+  function shipInfo(){
+    if(ship.mode==="combinar")return{ok:ship.comb.trim().length>2,fee:0};
+    if(ship.mode!=="entrega")return{ok:true,fee:0};
+    var r=REG.filter(function(x){return x[0]===ship.reg})[0];
+    if(ck()<FRETE.min||!r)return{ok:false,fee:0};
+    return{sel:true,km:r[1],fee:Math.round(r[1]*FRETE.km*100)/100,ok:ship.rua.trim().length>2};
   }
+
   function buildMsg(sub,si,tot){
     var L=["Olá! Quero fazer um pedido:"];
     lines().forEach(function(l){L.push(l.q+"x "+l.x.n)});
@@ -43,46 +80,68 @@
     if(ship.mode==="entrega"){
       L.push("Recebimento: ENTREGA");
       L.push("Endereço: "+ship.rua.trim()+", "+ship.reg+(ship.ref.trim()?" ("+ship.ref.trim()+")":""));
-      L.push("Frete: "+(si.free?"Grátis (a partir de "+FRETE.free+" cookies)":money(si.fee)+" (~"+kmf(si.km)+" km)"));
+      L.push("Frete: "+money(si.fee)+" (~"+kmf(si.km)+" km)");
+    }else if(ship.mode==="combinar"){
+      L.push("Recebimento: A COMBINAR");
+      L.push("Como combinar: "+ship.comb.trim());
     }else L.push("Recebimento: RETIRADA na loja ("+LOJA+")");
     L.push("Total: "+money(tot));
     L.push("Horário: a combinar");
     return encodeURIComponent(L.join("\n"));
   }
+
   function renderShip(){
     var el=$("#shipbody");if(!el)return;
-    if(ship.mode==="retirar"){el.innerHTML='<p class="soft" style="margin:0">Retirada na loja: '+LOJA+'. Horário a combinar.</p>';return}
+    if(ship.mode==="retirar"){el.innerHTML='<p class="soft" style="margin:0">Retire seus cookies na loja, na '+LOJA+'. O horário da retirada é combinado pelo WhatsApp.</p>';return}
+    if(ship.mode==="combinar"){el.innerHTML='<p class="soft" style="margin:0">Combine com alguém que pegue os cookies e entregue para você, ou escolha um lugar aonde uma das donas também vá e possa entregar. Descreva abaixo como prefere combinar:</p><label class="f">Como será a combinação<textarea class="in" id="scomb" rows="3" maxlength="300" placeholder="Ex.: meu colega Pedro retira na sexta, ou me entregam no meu trabalho">'+esc(ship.comb)+'</textarea></label>';return}
     el.innerHTML='<label class="f">Bairro ou cidade<select class="in" id="sreg"><option value="">Selecione</option>'+REG.map(function(r){return'<option'+(r[0]===ship.reg?" selected":"")+'>'+r[0]+'</option>'}).join("")+'</select></label>'+
       '<label class="f">Rua e número<input class="in" id="srua" autocomplete="street-address" placeholder="Ex.: Rua das Flores, 123" value="'+esc(ship.rua)+'"></label>'+
       '<label class="f">Complemento ou ponto de referência (opcional)<input class="in" id="sref" value="'+esc(ship.ref)+'"></label>'+
       '<p class="soft small" id="sinfo" style="margin:.8rem 0 0"></p>';
   }
+
   function updSum(){
-    var ls=lines(),c=count(),sub=ls.reduce(function(a,l){return a+l.x.p*l.q},0),si=shipInfo(c),tot=sub+si.fee;
-    $("#sum").innerHTML='<div class="sumrow soft"><span>Subtotal</span><span>'+money(sub)+'</span></div>'+(ship.mode==="entrega"?'<div class="sumrow soft"><span>Frete</span><span>'+(si.free?"Grátis":si.sel?money(si.fee):"—")+'</span></div>':"")+'<div class="total"><span>Total</span><b>'+money(tot)+'</b></div>';
-    var inf=$("#sinfo");
-    if(inf)inf.textContent=!si.sel?"Escolha o bairro para calcular o frete (R$ "+String(FRETE.km).replace(".",",")+"0 por km)."
-      :si.free?"Frete grátis: seu pedido tem "+c+" cookies (a partir de "+FRETE.free+")."
-      :"Distância estimada: ~"+kmf(si.km)+" km. Faltam "+(FRETE.free-c)+" cookies para frete grátis.";
+    var ls=lines(),sub=ls.reduce(function(a,l){return a+(l.x.p||0)*l.q},0),si=shipInfo(),tot=sub+si.fee;
+    $("#sum").innerHTML='<div class="sumrow soft"><span>Subtotal</span><span>'+money(sub)+'</span></div>'+(ship.mode==="entrega"?'<div class="sumrow soft"><span>Frete</span><span>'+(si.sel?money(si.fee):"—")+'</span></div>':"")+'<div class="total"><span>Total</span><b>'+money(tot)+'</b></div>';
+    var n=ck(),sn=$("#snote");if(sn)sn.textContent=n<FRETE.min?"Entrega disponível a partir de "+FRETE.min+" cookies (faltam "+(FRETE.min-n)+"). Frete de R$ "+kmp+" por km.":"Entrega: R$ "+kmp+" por km, sem frete grátis.";
+    var inf=$("#sinfo");if(inf)inf.textContent=si.sel?"Distância estimada: ~"+kmf(si.km)+" km × R$ "+kmp+" = "+money(si.fee)+".":"Escolha o bairro para calcular o frete.";
     var f=$("#fin");f.dataset.ok=si.ok?"1":"";f.classList.toggle("off",!si.ok);
     f.href=si.ok?"https://wa.me/"+PHONE+"?text="+buildMsg(sub,si,tot):"#carrinho";
-    $("#fhint").textContent=si.ok?"O pedido é confirmado pelo WhatsApp. O horário é combinado por lá.":"Escolha o bairro e informe a rua e o número para finalizar.";
+    $("#fhint").textContent=si.ok?"O pedido é confirmado pelo WhatsApp. O horário é combinado por lá.":ship.mode==="combinar"?"Descreva como será a combinação para finalizar.":"Escolha o bairro e informe a rua e o número para finalizar.";
   }
+
   function renderCart(){
     var b=$("#badge"),c=count();b.textContent=c;b.hidden=!c;
     var ls=lines();
     if(!ls.length){$("#cart").innerHTML='<div class="panel"><p class="soft" style="margin:0 0 1rem">Seu carrinho está vazio. Que tal escolher um cookie?</p><a class="cta" href="#cardapio">Ver cardápio</a></div>';return}
-    var rows=ls.map(function(l){return '<div class="line"><b>'+l.x.n+'<br><span class="soft" style="font-weight:400;font-size:.9rem">'+money(l.x.p)+'</span></b><div class="qty"><button data-q="-'+l.x.id+'" aria-label="Diminuir">−</button><span>'+l.q+'</span><button data-q="+'+l.x.id+'" aria-label="Aumentar">+</button></div></div>'}).join("");
-    $("#cart").innerHTML='<div class="panel">'+rows+'<div class="ship"><b>Como você quer receber?</b><div class="seg" role="group"><button data-m="retirar" aria-pressed="'+(ship.mode==="retirar")+'">Retirar</button><button data-m="entrega" aria-pressed="'+(ship.mode==="entrega")+'">Entrega</button></div><div id="shipbody"></div></div><div id="sum" style="margin-top:1.2rem"></div><a class="cta" id="fin" target="_blank" rel="noopener">Finalizar pedido</a><p class="soft small" id="fhint" style="margin:.9rem 0 0"></p></div>';
+    if(ship.mode==="entrega"&&ck()<FRETE.min)ship.mode="retirar";
+    var rows=ls.map(function(l){return '<div class="line"><b>'+l.x.n+'<br><span class="soft" style="font-weight:400;font-size:.9rem">'+money(l.x.p||0)+'</span></b><div class="qty"><button data-q="-'+l.x.id+'" aria-label="Diminuir">−</button><span>'+l.q+'</span><button data-q="+'+l.x.id+'" aria-label="Aumentar">+</button></div></div>'}).join("");
+    var seg=MODES.map(function(m){return '<button data-m="'+m[0]+'" aria-pressed="'+(ship.mode===m[0])+'"'+(m[0]==="entrega"&&ck()<FRETE.min?" disabled":"")+'>'+m[1]+'</button>'}).join("");
+    $("#cart").innerHTML='<div class="panel">'+rows+'<div class="ship"><b>Como você quer receber?</b><div class="seg" role="group">'+seg+'</div><p class="soft small" id="snote" style="margin:-.4rem 0 .8rem"></p><div id="shipbody"></div></div><div id="sum" style="margin-top:1.2rem"></div><a class="cta" id="fin" target="_blank" rel="noopener">Finalizar pedido</a><p class="soft small" id="fhint" style="margin:.9rem 0 0"></p></div>';
     renderShip();updSum();
   }
-  document.addEventListener("input",function(e){var i=e.target.id;if(i==="srua")ship.rua=e.target.value;else if(i==="sref")ship.ref=e.target.value;else return;updSum()});
+
+  document.addEventListener("input",function(e){
+    var i=e.target.id;
+    if(i==="srua")ship.rua=e.target.value;
+    else if(i==="sref")ship.ref=e.target.value;
+    else if(i==="scomb")ship.comb=e.target.value;
+    else return;
+    updSum();
+  });
+
   document.addEventListener("change",function(e){if(e.target.id==="sreg"){ship.reg=e.target.value;updSum()}});
+
   document.addEventListener("click",function(e){
     var m=e.target.closest("[data-m]"),f=e.target.closest("#fin");
-    if(m){ship.mode=m.dataset.m;document.querySelectorAll("[data-m]").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.m===ship.mode)});renderShip();updSum()}
-    if(f&&!f.dataset.ok){e.preventDefault();toast("Informe o endereço de entrega")}
+    if(m&&!m.disabled){
+      ship.mode=m.dataset.m;
+      document.querySelectorAll("[data-m]").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.m===ship.mode)});
+      renderShip();updSum()
+    }
+    if(f&&!f.dataset.ok){e.preventDefault();toast("Preencha os dados do recebimento")}
   });
+
   document.addEventListener("click",function(e){
     var a=e.target.closest("[data-add]"),q=e.target.closest("[data-q]");
     if(a){var k=a.dataset.add;cart[k]=(cart[k]||0)+1;save();renderCart();toast("Adicionado ao carrinho")}
@@ -96,28 +155,34 @@
   var fdate=function(d){try{return new Date(d).toLocaleDateString("pt-BR")}catch(e){return""}};
   function all(k){return remote[k].concat(LOC[k]).sort(function(a,b){return(b.d||0)-(a.d||0)})}
   function stars(n){n=Math.max(0,Math.min(5,parseInt(n)||0));return"★★★★★".slice(0,n)+"☆☆☆☆☆".slice(0,5-n)}
+
   function renderRev(){
     var L=all("rev"),n=L.length,avg=n?L.reduce(function(a,r){return a+(parseInt(r.s)||0)},0)/n:0;
     $("#rsum").innerHTML=n?'<div style="display:flex;align-items:center;gap:1rem"><span class="big">'+avg.toFixed(1).replace(".",",")+'</span><div><div class="rv" style="padding:0;border:0"><span class="st">'+stars(Math.round(avg))+'</span></div><span class="soft small">'+n+(n>1?" avaliações":" avaliação")+'</span></div></div>':'<p class="soft" style="margin:0">Ainda não há avaliações. Seja o primeiro a contar como foi!</p>';
     $("#rlist").innerHTML=n?L.map(function(r){return'<div class="rv"><h4>'+esc(r.n||"Cliente")+(r.local?'<span class="tag">só neste aparelho</span>':"")+'</h4><span class="st">'+stars(r.s)+'</span> <small>'+(r.f?esc(r.f)+" · ":"")+fdate(r.d)+'</small>'+(r.t?'<p>'+esc(r.t)+'</p>':"")+'</div>'}).join(""):"";
     $("#rlist").hidden=!n;
   }
+
   function renderIde(){
     var L=all("ide"),F=L.filter(function(i){return ifil==="Todas"||i.c===ifil});
     $("#ilist").innerHTML=F.length?F.map(function(i){return'<div class="rv"><h4>'+esc(i.n||"Cliente")+'<span class="tag">'+esc(i.c||"Outro")+'</span>'+(i.local?'<span class="tag">só neste aparelho</span>':"")+'</h4><p>'+esc(i.t)+'</p><small>'+fdate(i.d)+'</small></div>'}).join(""):'<p class="soft" style="margin:0">Nenhuma sugestão nesta categoria ainda.</p>';
     document.querySelectorAll("[data-if]").forEach(function(b){var k=b.dataset.if;b.setAttribute("aria-pressed",k===ifil);b.textContent=k+" ("+(k==="Todas"?L.length:L.filter(function(i){return i.c===k}).length)+")"});
   }
+
   function initAv(){
-    $("#av-rev").innerHTML='<div class="panel" id="rsum"></div><div class="panel sub"><h3>Deixe sua avaliação</h3><label class="f">Seu nome<input class="in" id="rn" maxlength="30" placeholder="Como quer aparecer"></label><label class="f">Sabor que você provou<select class="in" id="rf"><option>Vários sabores</option>'+ITEMS.map(function(x){return'<option>'+x.n+'</option>'}).join("")+'</select></label><div class="f">Sua nota</div><div class="sbtn" id="rs">'+[1,2,3,4,5].map(function(i){return'<button data-s="'+i+'" aria-label="'+i+' estrelas">★</button>'}).join("")+'</div><label class="f">Comentário<textarea class="in" id="rt" rows="3" maxlength="400" placeholder="Conte como foi"></textarea></label><p class="small" id="rmsg" role="status" style="color:var(--butter);min-height:1.3em;margin:.6rem 0 0"></p><button class="cta" id="rsend">Publicar avaliação</button></div><div class="panel sub" id="rlist"></div>';
+    $("#av-rev").innerHTML='<div class="panel" id="rsum"></div><div class="panel sub"><h3>Deixe sua avaliação</h3><label class="f">Seu nome<input class="in" id="rn" maxlength="30" placeholder="Como quer aparecer"></label><label class="f">O que você provou<select class="in" id="rf"><option>Vários sabores</option>'+ITEMS.map(function(x){return'<option>'+x.n+'</option>'}).join("")+'</select></label><div class="f">Sua nota</div><div class="sbtn" id="rs">'+[1,2,3,4,5].map(function(i){return'<button data-s="'+i+'" aria-label="'+i+' estrelas">★</button>'}).join("")+'</div><label class="f">Comentário<textarea class="in" id="rt" rows="3" maxlength="400" placeholder="Conte como foi"></textarea></label><p class="small" id="rmsg" role="status" style="color:var(--butter);min-height:1.3em;margin:.6rem 0 0"></p><button class="cta" id="rsend">Publicar avaliação</button></div><div class="panel sub" id="rlist"></div>';
+
     $("#av-ide").innerHTML='<p class="lead" style="margin:0 0 .5rem">Quer ver um sabor ou doce novo por aqui? Conte para a gente.</p><div class="panel"><div class="f" style="margin:0">Tipo de sugestão</div><div class="seg" role="group">'+ITYPES.map(function(k){return'<button data-it="'+k+'" aria-pressed="'+(k===itype)+'">'+k+'</button>'}).join("")+'</div><label class="f" style="margin-top:0">Sua ideia<textarea class="in" id="it" rows="3" maxlength="400" placeholder="Ex.: cookie de pistache com chocolate branco"></textarea></label><label class="f">Seu nome (opcional)<input class="in" id="in" maxlength="30"></label><p class="small" id="imsg" role="status" style="color:var(--butter);min-height:1.3em;margin:.6rem 0 0"></p><button class="cta" id="isend">Enviar sugestão</button></div><div class="chips">'+["Todas"].concat(ITYPES).map(function(k){return'<button data-if="'+k+'" aria-pressed="'+(k===ifil)+'"></button>'}).join("")+'</div><div class="panel" id="ilist"></div>';
     renderRev();renderIde();
   }
+
   function persist(kind,o){
     function loc(){o.local=1;LOC[kind].push(o);saveLoc()}
     if(!(DBX&&UID)){loc();return Promise.resolve()}
     var p=kind==="rev"?DBX.doc("reviews/"+UID).set(o):DBX.doc("ideas/"+UID).set({items:remote.ide.filter(function(i){return i.u===UID}).concat([o])});
     return p.then(function(){},function(){loc()});
   }
+
   $("#p-avaliacoes").addEventListener("click",function(e){
     var t=e.target.closest("[data-t]"),s=e.target.closest("[data-s]"),it=e.target.closest("[data-it]"),fl=e.target.closest("[data-if]");
     if(t){document.querySelectorAll("[data-t]").forEach(function(b){b.setAttribute("aria-pressed",b===t)});$("#av-rev").hidden=t.dataset.t!=="rev";$("#av-ide").hidden=t.dataset.t!=="ide"}
@@ -135,7 +200,9 @@
         $("#imsg").textContent="Obrigado! Sua sugestão foi enviada.";$("#it").value="";renderIde()});
     }
   });
+
   initAv();
+
   try{
     if(window.claude&&claude.use)Promise.all([claude.use("db"),claude.use("user")]).then(function(r){
       DBX=r[0];if(!DBX)return;
@@ -162,11 +229,13 @@
     }
     old?(old.classList.add("leave"),setTimeout(swap,220)):swap();
   }
+
   function route(){
     var h=(location.hash||"#inicio").slice(1);
     if(h==="cardapio"){show("inicio",function(){var h=$("#hero");window.scrollTo({top:h.offsetTop+h.offsetHeight-innerHeight*.15,behavior:"smooth"})});return}
     show(ROUTES.indexOf(h)>-1?h:"inicio");
   }
+
   $("#nav").addEventListener("click",function(e){var b=e.target.closest("button");if(b)location.hash=b.dataset.r});
   window.addEventListener("hashchange",route);
 
@@ -174,9 +243,18 @@
   var hero=$("#hero"),words=$("#words"),intro=$("#intro"),cv=$("#gl"),tick=false;
   var cl=function(v){return Math.min(1,Math.max(0,v))},sm=function(t){return t*t*(3-2*t)};
   var AUTO={on:false,p:0},T={e1:0,e2:0},S={e1:0,e2:0},mx=0,my=0,R,cam,sc,piv,Z=8,VH=4.5,lw=0;
-  function plastic(t1,t2,k){return new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:{k:{value:k},t1:{value:t1},t2:{value:t2}},
-    vertexShader:"varying vec3 n;varying vec3 v;varying vec2 pp;void main(){pp=position.xz;vec4 m=modelViewMatrix*vec4(position,1.);n=normalize(normalMatrix*normal);v=-m.xyz;gl_Position=projectionMatrix*m;}",
-    fragmentShader:"uniform float k;uniform sampler2D t1,t2;varying vec3 n;varying vec3 v;varying vec2 pp;float H(vec2 p){return texture2D(t1,p/2.7+.5).r*.6+texture2D(t2,p/2.4+vec2(.45,.5)).r*.4;}void main(){vec2 p=pp;vec2 dd=abs(p)-vec2(1.11);if(length(max(dd,0.))-.16>0.)discard;float e=.02,h0=H(p),hx=H(p+vec2(e,0.))-H(p-vec2(e,0.)),hy=H(p+vec2(0.,e))-H(p-vec2(0.,e));float av=(H(p+vec2(.07,0.))+H(p-vec2(.07,0.))+H(p+vec2(0.,.07))+H(p-vec2(0.,.07)))*.25;float d=h0-av;vec3 N=normalize(n);if(!gl_FrontFacing)N=-N;N=normalize(N+vec3(hx,-hy,0.)*.7);vec3 V=normalize(v);float f=pow(1.-abs(dot(N,V)),2.2);vec3 A=normalize(vec3(.6,.9,.8)),B=normalize(vec3(-.8,.2,.6));float s=pow(max(dot(N,normalize(A+V)),0.),60.)+.5*pow(max(dot(N,normalize(B+V)),0.),35.);float cr=clamp(d*7.,0.,1.);float a=k*(.05+.2*f)+s*.45+cr*.06;gl_FragColor=vec4(mix(vec3(.88,.94,1.),vec3(1.),clamp(s+cr,0.,1.)),clamp(a,0.,1.));}"});}
+
+  function plastic(t1,t2,k){
+    return new THREE.ShaderMaterial({
+      transparent:true,
+      depthWrite:false,
+      side:THREE.DoubleSide,
+      uniforms:{k:{value:k},t1:{value:t1},t2:{value:t2}},
+      vertexShader:"varying vec3 n;varying vec3 v;varying vec2 pp;void main(){pp=position.xz;vec4 m=modelViewMatrix*vec4(position,1.);n=normalize(normalMatrix*normal);v=-m.xyz;gl_Position=projectionMatrix*m;}",
+      fragmentShader:"uniform float k;uniform sampler2D t1,t2;varying vec3 n;varying vec3 v;varying vec2 pp;float H(vec2 p){return texture2D(t1,p/2.7+.5).r*.6+texture2D(t2,p/2.4+vec2(.45,.5)).r*.4;}void main(){vec2 p=pp;vec2 dd=abs(p)-vec2(1.11);if(length(max(dd,0.))-.16>0.)discard;float e=.02,h0=H(p),hx=H(p+vec2(e,0.))-H(p-vec2(e,0.)),hy=H(p+vec2(0.,e))-H(p-vec2(0.,e));float av=(H(p+vec2(.07,0.))+H(p-vec2(.07,0.))+H(p+vec2(0.,.07))+H(p-vec2(0.,.07)))*.25;float d=h0-av;vec3 N=normalize(n);if(!gl_FrontFacing)N=-N;N=normalize(N+vec3(hx,-hy,0.)*.7);vec3 V=normalize(v);float f=pow(1.-abs(dot(N,V)),2.2);vec3 A=normalize(vec3(.6,.9,.8)),B=normalize(vec3(-.8,.2,.6));float s=pow(max(dot(N,normalize(A+V)),0.),60.)+.5*pow(max(dot(N,normalize(B+V)),0.),35.);float cr=clamp(d*7.,0.,1.);float a=k*(.05+.2*f)+s*.45+cr*.06;gl_FragColor=vec4(mix(vec3(.88,.94,1.),vec3(1.),clamp(s+cr,0.,1.)),clamp(a,0.,1.));}"
+    });
+  }
+
   function init3d(){
     if(!window.THREE){var f=$("#fb");f.src=TEX;f.hidden=false;cv.hidden=true;return}
     try{R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true})}catch(e){var f2=$("#fb");f2.src=TEX;f2.hidden=false;cv.hidden=true;return}
@@ -230,6 +308,7 @@
       piv.position.y=S.e2*VH*.25+Math.sin(t/1000)*.03;
       var s=1-.42*S.e2;piv.scale.set(s,s,s);R.render(sc,cam)})(0);
   }
+
   var lh=0;
   function upd(){
     tick=false;if(cur!=="inicio")return;
@@ -240,8 +319,10 @@
     intro.style.opacity=e3;intro.style.transform="translateY("+((1-e3)*18-6)+"svh)";
     intro.style.pointerEvents=e3>.6?"auto":"none";
   }
+
   window.addEventListener("scroll",function(){if(!tick){tick=true;requestAnimationFrame(upd)}},{passive:true});
   window.addEventListener("resize",upd);
+
   // palavras no maior tamanho que cabe na tela
   function fit(){
     var st=$("#stage"),w=$(".w1"),vw=st.clientWidth,vh=st.clientHeight;if(!vw||!vh)return;
@@ -252,6 +333,7 @@
   }
   window.addEventListener("resize",fit);
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+
   // apresentação automática: o cookie vira e a tela desce sozinha até o convite
   function autoplay(){
     var h0=location.hash.slice(1);if((h0&&h0!=="inicio")||window.scrollY>5)return;
@@ -279,6 +361,7 @@
       requestAnimationFrame(step);
     },700);
   }
+
   init3d();
   renderCart();route();autoplay();
 })();
